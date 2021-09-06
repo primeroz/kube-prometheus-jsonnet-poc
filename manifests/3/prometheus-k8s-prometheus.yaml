@@ -31,7 +31,9 @@ spec:
       namespace: monitoring
       port: web
   enableFeatures: []
-  externalLabels: {}
+  externalLabels:
+    cluster: someCluster
+    instance: k8s
   image: quay.io/prometheus/prometheus:v2.29.1
   nodeSelector:
     kubernetes.io/os: linux
@@ -42,13 +44,27 @@ spec:
       app.kubernetes.io/part-of: kube-prometheus
       app.kubernetes.io/version: 2.29.2
   podMonitorNamespaceSelector: {}
-  podMonitorSelector: {}
+  podMonitorSelector:
+    matchExpressions:
+    - key: prometheus
+      operator: In
+      values:
+      - k8s
   priorityClassName: influxdata-infra-observability
   probeNamespaceSelector: {}
-  probeSelector: {}
+  probeSelector:
+    matchExpressions:
+    - key: prometheus
+      operator: In
+      values:
+      - k8s
   replicas: 2
   resources:
+    limits:
+      cpu: 2500m
+      memory: 4000Mi
     requests:
+      cpu: 250m
       memory: 400Mi
   retention: 24h
   ruleNamespaceSelector: {}
@@ -69,5 +85,10 @@ spec:
     runAsUser: 1000
   serviceAccountName: prometheus-k8s
   serviceMonitorNamespaceSelector: {}
-  serviceMonitorSelector: {}
+  serviceMonitorSelector:
+    matchExpressions:
+    - key: prometheus
+      operator: In
+      values:
+      - k8s
   version: 2.29.2

@@ -15,6 +15,14 @@ local kp =
       },
       prometheus+: {
         version: '2.29.2',
+        resources: {
+          requests: { cpu: '250m', memory: '400Mi' },
+          limits: { cpu: '2500m', memory: '4000Mi' },
+        },
+        enableFeatures: [],  // XXX ?
+        externalLabels+: {
+          cluster: 'someCluster',
+        },
         ruleSelector: {
           matchExpressions: [
             {
@@ -37,12 +45,25 @@ local kp =
   };
 
 // Hardcoded settings to extend PrometheusSpec
-local customizePrometheusSpec =
+local customizePrometheusSpec(instance) =
   {
     prometheus+: {
       spec+: {
         priorityClassName: 'influxdata-infra-observability',
         retention: '24h',
+        thisPrometheusSelector:: {
+          matchExpressions:
+            [
+              {
+                key: 'prometheus',
+                operator: 'In',
+                values: [instance],
+              },
+            ],
+        },
+        serviceMonitorSelector: $.prometheus.spec.thisPrometheusSelector,
+        podMonitorSelector: $.prometheus.spec.thisPrometheusSelector,
+        probeSelector: $.prometheus.spec.thisPrometheusSelector,
       },
     },
   };
@@ -54,9 +75,12 @@ local kp_k8s =
     values+:: {
       prometheus+: {
         name: 'k8s',
+        externalLabels+: {
+          instance: 'k8s',
+        },
       },
     },
-    prometheus+: customizePrometheusSpec,
+    prometheus+: customizePrometheusSpec($.values.prometheus.name),
   };
 
 // Istio prometheus instance
@@ -66,9 +90,13 @@ local kp_istio =
     values+:: {
       prometheus+: {
         name: 'istio',
+        replicas: 1,
+        externalLabels+: {
+          instance: 'istio',
+        },
       },
     },
-    prometheus+: customizePrometheusSpec,
+    prometheus+: customizePrometheusSpec($.values.prometheus.name),
   };
 
 
