@@ -153,15 +153,15 @@ local kp_istio =
   for name in std.filter((function(name) name != 'serviceMonitor' && name != 'prometheusRule'), std.objectFields(kp.prometheusOperator))
 } +
 // serviceMonitor and prometheusRule are separated so that they can be created after the CRDs are ready
-////{ '2/prometheus-operator-serviceMonitor': kp.prometheusOperator.serviceMonitor } +
-////{ '2/prometheus-operator-prometheusRule': kp.prometheusOperator.prometheusRule } +
-////{ '2/kube-prometheus-prometheusRule': kp.kubePrometheus.prometheusRule } +
+//{ '2/prometheus-operator-serviceMonitor': kp.prometheusOperator.serviceMonitor } +
+//{ '2/prometheus-operator-prometheusRule': kp.prometheusOperator.prometheusRule } +
+//{ '2/kube-prometheus-prometheusRule': kp.kubePrometheus.prometheusRule } +
 // Monitoring workloads
-////{ ['2/node-exporter-' + name]: kp.nodeExporter[name] for name in std.objectFields(kp.nodeExporter) }
+{ ['3/node-exporter-' + name]: kp.nodeExporter[name] for name in std.objectFields(kp.nodeExporter) }
 // Prometheus instances
-{ ['3/prometheus-k8s-' + name]: kp_k8s.prometheus[name] for name in std.objectFields(kp_k8s.prometheus) } +
-{ ['3/prometheus-istio-' + name]: kp_istio.prometheus[name] for name in std.objectFields(kp_istio.prometheus) }
-////{ ['4/alertmanager-' + name]: kp.alertmanager[name] for name in std.objectFields(kp.alertmanager) } +
+{ ['4/prometheus-k8s-' + name]: kp_k8s.prometheus[name] for name in std.objectFields(kp_k8s.prometheus) } +
+{ ['4/prometheus-istio-' + name]: kp_istio.prometheus[name] for name in std.objectFields(kp_istio.prometheus) } +
+{ ['4/alertmanager-' + name]: kp.alertmanager[name] for name in std.objectFields(kp.alertmanager) }
 // //{ ['blackbox-exporter-' + name]: kp.blackboxExporter[name] for name in std.objectFields(kp.blackboxExporter) } +
 //{ ['5/grafana-' + name]: kp.grafana[name] for name in std.objectFields(kp.grafana) },
 // //{ ['kube-state-metrics-' + name]: kp.kubeStateMetrics[name] for name in std.objectFields(kp.kubeStateMetrics) } +
