@@ -51,7 +51,6 @@ spec:
       operator: In
       values:
       - istio
-  priorityClassName: influxdata-infra-observability
   probeNamespaceSelector: {}
   probeSelector:
     matchExpressions:

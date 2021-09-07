@@ -51,7 +51,6 @@ spec:
       operator: In
       values:
       - k8s
-  priorityClassName: influxdata-infra-observability
   probeNamespaceSelector: {}
   probeSelector:
     matchExpressions:

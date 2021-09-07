@@ -85,7 +85,7 @@ local customizePrometheusSpec(instance, port) =
   {
     prometheus+: {
       spec+: {
-        priorityClassName: 'influxdata-infra-observability',
+        //priorityClassName: 'influxdata-infra-observability',
         retention: '24h',  // Bytes and Time
         externalUrl: std.format('http://%s:%s', [minikube_ip, port]),
         thisPrometheusSelector:: {
