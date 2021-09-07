@@ -1,14 +1,7 @@
 // XXX rule label for recording rules as well as recording rules ?  see ruleSelector
-local k = import 'vendor/k8s-jsonnet-libs/gen/github.com/jsonnet-libs/k8s-libsonnet/1.19/main.libsonnet';
-local kplib = import 'vendor/k8s-jsonnet-libs/gen/github.com/jsonnet-libs/kube-prometheus-libsonnet/0.8/main.libsonnet';
 
-// get with `minikube ip` command
 local minikube_ip = '192.168.39.44';
 
-// prometheus jsonnet lib
-local prom = kplib.monitoring.v1.prometheus;
-
-// Kube Prometheus definition
 local kp =
   (import 'kube-prometheus/main.libsonnet') +
   (import 'kube-prometheus/addons/anti-affinity.libsonnet') +
@@ -96,20 +89,26 @@ local kp =
 // Hardcoded settings to extend PrometheusSpec
 local customizePrometheusSpec(instance, port) =
   {
-    //priorityClassName: 'influxdata-infra-observability',
-    //local thisPrometheusSelectorMatchExpression =
-    //  {
-    //    key: 'prometheus',
-    //    operator: 'In',
-    //    values: [instance],
-    //  },
-    prometheus+:
-      prom.spec.withRetention('24h') +
-      prom.spec.withRetentionSize('500MB') +
-      prom.spec.withExternalUrl(std.format('http://%s:%s', [minikube_ip, port])) +
-      prom.spec.serviceMonitorSelector.withMatchLabelsMixin({ prometheus: instance }) +
-      prom.spec.podMonitorSelector.withMatchLabelsMixin({ prometheus: instance }) +
-      prom.spec.probeSelector.withMatchLabelsMixin({ prometheus: instance }),
+    prometheus+: {
+      spec+: {
+        //priorityClassName: 'influxdata-infra-observability',
+        retention: '24h',  // Bytes and Time
+        externalUrl: std.format('http://%s:%s', [minikube_ip, port]),
+        thisPrometheusSelector:: {
+          matchExpressions:
+            [
+              {
+                key: 'prometheus',
+                operator: 'In',
+                values: [instance],
+              },
+            ],
+        },
+        serviceMonitorSelector: $.prometheus.spec.thisPrometheusSelector,
+        podMonitorSelector: $.prometheus.spec.thisPrometheusSelector,
+        probeSelector: $.prometheus.spec.thisPrometheusSelector,
+      },
+    },
   };
 
 // Main prometheus instance
