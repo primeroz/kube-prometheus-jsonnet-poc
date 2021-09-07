@@ -42,6 +42,18 @@ local kp =
         },
       },
     },
+    prometheus+: {
+      // backward compatible for older k8s
+      clusterRole+: {
+        rules+: [
+          {
+            apiGroups: ['extensions'],
+            resources: ['ingresses'],
+            verbs: ['get', 'list', 'watch'],
+          },
+        ],
+      },
+    },
   };
 
 // Hardcoded settings to extend PrometheusSpec
