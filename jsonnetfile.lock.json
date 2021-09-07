@@ -44,6 +44,16 @@
     {
       "source": {
         "git": {
+          "remote": "https://github.com/influxdata/k8s-jsonnet-libs.git",
+          "subdir": ""
+        }
+      },
+      "version": "f9726346effb5d09a661383b2f5563303ed83e9a",
+      "sum": "ufWDC+avCcgwZ1iaNRZuPNyVKQkwwZzGakgvtkmdGAo="
+    },
+    {
+      "source": {
+        "git": {
           "remote": "https://github.com/kubernetes-monitoring/kubernetes-mixin.git",
           "subdir": ""
         }
