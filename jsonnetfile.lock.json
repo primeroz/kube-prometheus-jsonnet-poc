@@ -8,8 +8,8 @@
           "subdir": "grafana"
         }
       },
-      "version": "405638a537f707f8ccb20b253e06115d2c5b5985",
-      "sum": "nYNhnrcoG4vRof2Azg3iX+8/qwmceekOQ2VwIR3nYNk="
+      "version": "90f38916f1f8a310a715d18e36f787f84df4ddf5",
+      "sum": "0kZ1pnuIirDtbg6F9at5+NQOwKNONIGEPq0eECzvRkI="
     },
     {
       "source": {
@@ -88,8 +88,8 @@
           "subdir": "jsonnet/kube-prometheus"
         }
       },
-      "version": "9ead6ebc539e463a45d9e04a9168ff91ba4dc7c4",
-      "sum": "amTJvacjyfzql3YWkeOV92B3lvSRGsk/7SqXGcDdCw0="
+      "version": "fdcff9a2247fce52cceadd7293256b760ec8f3ed",
+      "sum": "DH+KLDyiKNCYMQHxbayxv4LTFutztubKPaRqfn0s+Y0="
     },
     {
       "source": {

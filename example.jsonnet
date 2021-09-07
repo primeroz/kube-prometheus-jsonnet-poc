@@ -17,6 +17,9 @@ local kp =
         namespace: 'monitoring',
         platform: 'kubeadm',
         versions+: {
+          alertmanager: '0.23.0',
+          grafana: '8.1.2',
+          nodeExporter: '1.2.2',
           prometheusOperator: '0.50.0',
           prometheus: '2.29.2',
         },
