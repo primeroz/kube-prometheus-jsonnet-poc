@@ -1,4 +1,8 @@
-// XXX rule label for recording rules as well as recording rules ?  see ruleSelector
+// TODO: rule label for recording rules as well as recording rules ?  see ruleSelector
+// TODO: Dashboards - take a long time to render ...
+// TODO: Dashboards - split up in multiple ConfigMaps object or hit the limit of 1MB
+
+
 local k = import 'vendor/k8s-jsonnet-libs/gen/github.com/jsonnet-libs/k8s-libsonnet/1.19/main.libsonnet';
 local kplib = import 'vendor/k8s-jsonnet-libs/gen/github.com/jsonnet-libs/kube-prometheus-libsonnet/0.8/main.libsonnet';
 
@@ -211,9 +215,9 @@ local kp_istio =
 // Prometheus instances
 { ['4/prometheus-k8s-' + name]: kp_k8s.prometheus[name] for name in std.objectFields(kp_k8s.prometheus) } +
 { ['4/prometheus-istio-' + name]: kp_istio.prometheus[name] for name in std.objectFields(kp_istio.prometheus) } +
-{ ['4/alertmanager-' + name]: kp.alertmanager[name] for name in std.objectFields(kp.alertmanager) }
+{ ['4/alertmanager-' + name]: kp.alertmanager[name] for name in std.objectFields(kp.alertmanager) } +
 // //{ ['blackbox-exporter-' + name]: kp.blackboxExporter[name] for name in std.objectFields(kp.blackboxExporter) } +
-//{ ['5/grafana-' + name]: kp.grafana[name] for name in std.objectFields(kp.grafana) },
+{ ['5/grafana-' + name]: kp.grafana[name] for name in std.objectFields(kp.grafana) }
 // //{ ['kube-state-metrics-' + name]: kp.kubeStateMetrics[name] for name in std.objectFields(kp.kubeStateMetrics) } +
 // //{ ['kubernetes-' + name]: kp.kubernetesControlPlane[name] for name in std.objectFields(kp.kubernetesControlPlane) }
 // { ['3/prometheus-' + name]: kp.prometheus[name] for name in std.objectFields(kp.prometheus) }
