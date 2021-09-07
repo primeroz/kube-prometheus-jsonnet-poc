@@ -35,7 +35,7 @@ spec:
     cluster: someCluster
     instance: k8s
   externalUrl: http://192.168.39.44:30900
-  image: quay.io/prometheus/prometheus:v2.29.1
+  image: quay.io/prometheus/prometheus:v2.29.2
   nodeSelector:
     kubernetes.io/os: linux
   podMetadata:
@@ -58,7 +58,7 @@ spec:
       operator: In
       values:
       - k8s
-  replicas: 2
+  replicas: 1
   resources:
     limits:
       cpu: 2500m

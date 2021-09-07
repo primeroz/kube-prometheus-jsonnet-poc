@@ -16,6 +16,10 @@ local kp =
       common+: {
         namespace: 'monitoring',
         platform: 'kubeadm',
+        versions+: {
+          prometheusOperator: '0.50.0',
+          prometheus: '2.29.2',
+        },
       },
       //alertmanager+: {
       //config: importstr 'alertmanager-config.yaml',
@@ -29,7 +33,6 @@ local kp =
         },
       },
       prometheus+: {
-        version: '2.29.2',
         resources: {
           requests: { cpu: '250m', memory: '400Mi' },
           limits: { cpu: '2500m', memory: '4000Mi' },
@@ -112,6 +115,7 @@ local kp_k8s =
     values+:: {
       prometheus+: {
         name: 'k8s',
+        replicas: 1,  // minikube only one replica
         externalLabels+: {
           instance: 'k8s',
         },
