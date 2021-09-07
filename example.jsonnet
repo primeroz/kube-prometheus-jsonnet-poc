@@ -7,6 +7,26 @@ local minikube_ip = '192.168.39.44';
 
 // prometheus jsonnet lib
 local prom = kplib.monitoring.v1.prometheus;
+local sm = kplib.monitoring.v1.serviceMonitor;
+
+
+local setInstanceForServiceMonitor(instance) =
+  {
+    metadata+: {
+      labels+: {
+        prometheus: instance,
+      },
+    },
+  };
+
+local setEndpointsIntevalForServiceMonitor(endpoints, interval) =
+  std.map(
+    function(item)
+      if (std.objectHas(item, 'interval'))
+      then item { interval: interval }
+      else item
+    , endpoints
+  );
 
 // Kube Prometheus definition
 local kp =
@@ -90,6 +110,16 @@ local kp =
           logLevel: 'debug',  // So firing alerts show up in log
         },
       },
+    },
+    nodeExporter+: {
+      serviceMonitor+:
+        setInstanceForServiceMonitor('k8s') +
+        {
+          spec+: {
+            // Override Interval for nodeExporter ( PR Upstream ? )
+            endpoints: setEndpointsIntevalForServiceMonitor(super.endpoints, '30s'),
+          },
+        },
     },
   };
 
