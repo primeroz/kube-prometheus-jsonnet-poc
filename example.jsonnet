@@ -90,6 +90,10 @@ local kp =
         },
       },
     },
+    prometheusOperator+: {
+      serviceMonitor+:
+        setInstanceForServiceMonitor('k8s'),
+    },
     prometheus+: {
       // backward compatible for older k8s
       clusterRole+: {
@@ -155,7 +159,11 @@ local kp_k8s =
         },
       },
     },
-    prometheus+: customizePrometheusSpec($.values.prometheus.name, '30900'),
+    prometheus+: customizePrometheusSpec($.values.prometheus.name, '30900') +
+                 {
+                   serviceMonitor+:
+                     setInstanceForServiceMonitor('k8s'),
+                 },
   };
 
 // Istio prometheus instance
@@ -179,6 +187,10 @@ local kp_istio =
                        type: 'NodePort',
                      },
                    },
+                 } +
+                 {
+                   serviceMonitor+:
+                     setInstanceForServiceMonitor('istio'),
                  },
   };
 
@@ -191,9 +203,9 @@ local kp_istio =
   for name in std.filter((function(name) name != 'serviceMonitor' && name != 'prometheusRule'), std.objectFields(kp.prometheusOperator))
 } +
 // serviceMonitor and prometheusRule are separated so that they can be created after the CRDs are ready
-//{ '2/prometheus-operator-serviceMonitor': kp.prometheusOperator.serviceMonitor } +
-//{ '2/prometheus-operator-prometheusRule': kp.prometheusOperator.prometheusRule } +
-//{ '2/kube-prometheus-prometheusRule': kp.kubePrometheus.prometheusRule } +
+{ '2/prometheus-operator-serviceMonitor': kp.prometheusOperator.serviceMonitor } +
+{ '2/prometheus-operator-prometheusRule': kp.prometheusOperator.prometheusRule } +
+//{ '2/kube-prometheus-prometheusRule': kp.kubePrometheus.prometheusRule } + // need on both istio and k8s instances
 // Monitoring workloads
 { ['3/node-exporter-' + name]: kp.nodeExporter[name] for name in std.objectFields(kp.nodeExporter) }
 // Prometheus instances
