@@ -1,6 +1,7 @@
 // TODO: rule label for recording rules as well as recording rules ?  see ruleSelector
 // TODO: Dashboards - take a long time to render ...
-// TODO: Dashboards - split up in multiple ConfigMaps object or hit the limit of 1MB
+// TODO: Dashboards - split up in multiple ConfigMaps object or hit the limit of 1MB ( is alreayd split )
+// TODO: Dashboard - filter out dashboards we don't need / want
 
 
 local k = import 'vendor/k8s-jsonnet-libs/gen/github.com/jsonnet-libs/k8s-libsonnet/1.19/main.libsonnet';
