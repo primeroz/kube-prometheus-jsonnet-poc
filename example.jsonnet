@@ -2,6 +2,8 @@
 // TODO: Dashboards - take a long time to render ...
 // TODO: Dashboards - split up in multiple ConfigMaps object or hit the limit of 1MB ( is alreayd split )
 // TODO: Dashboard - filter out dashboards we don't need / want
+// TODO: Prometheus - service monitor - exclude some namespaces for safety
+// TODO: Prometheus - Ingestigate SLO rules
 
 
 local k = import 'vendor/k8s-jsonnet-libs/gen/github.com/jsonnet-libs/k8s-libsonnet/1.19/main.libsonnet';
@@ -159,7 +161,7 @@ local kp =
     },
     kubernetesControlPlane+: {
       //[name]: super[name]
-      [name]: super[name] + (if super[name].kind == 'ServiceMonitor' || super[name].kind == 'PodMonitor' then setInstanceForObject('k8') else {})
+      [name]: super[name] + (if super[name].kind == 'ServiceMonitor' || super[name].kind == 'PodMonitor' then setInstanceForObject('k8s') else {})
       for name in std.objectFields(super.kubernetesControlPlane)
     },
     /// JSONNET OVVERRIDES END HERE
