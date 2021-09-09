@@ -37,7 +37,7 @@ local setEndpointsIntevalForServiceMonitor(endpoints, interval) =
 local kp =
   (import 'kube-prometheus/main.libsonnet') +
   (import 'kube-prometheus/addons/anti-affinity.libsonnet') +
-  (import 'kube-prometheus/addons/managed-cluster.libsonnet') +
+  //(import 'kube-prometheus/addons/managed-cluster.libsonnet') + // this is not a managed cluster
   (import 'kube-prometheus/addons/all-namespaces.libsonnet') +
   // Note that NodePort type services is likely not a good idea for your production use case, it is only used for demonstration purposes here.
   (import 'kube-prometheus/addons/node-ports.libsonnet') +
@@ -64,6 +64,25 @@ local kp =
           sections: {
             // Do not require grafana users to login/authenticate
             'auth.anonymous': { enabled: true },
+          },
+        },
+      },
+      kubernetesControlPlane+: {
+        kubeProxy: true,
+        mixin+: {
+          //ruleLabels: $.values.common.ruleLabels,
+          _config+: {
+            cadvisorSelector: 'job="kubelet", metrics_path="/metrics/cadvisor"',
+            kubeletSelector: 'job="kubelet", metrics_path="/metrics"',
+            kubeStateMetricsSelector: 'job="kube-state-metrics"',
+            nodeExporterSelector: 'job="node-exporter"',
+            kubeSchedulerSelector: 'job="kube-scheduler"',
+            kubeControllerManagerSelector: 'job="kube-controller-manager"',
+            kubeApiserverSelector: 'job="apiserver"',
+            podLabel: 'pod',
+            runbookURLPattern: 'https://runbooks.prometheus-operator.dev/runbooks/kubernetes/%s',
+            diskDeviceSelector: 'device=~"mmcblk.p.+|nvme.+|rbd.+|sd.+|vd.+|xvd.+|dm-.+|dasd.+"',
+            hostNetworkInterfaceSelector: 'device!~"veth.+"',
           },
         },
       },
@@ -95,6 +114,8 @@ local kp =
         },
       },
     },
+
+    /// JSONNET OVVERRIDES START HERE
     prometheusOperator+: {
       serviceMonitor+:
         setInstanceForObject('k8s'),
@@ -136,6 +157,12 @@ local kp =
           },
         },
     },
+    kubernetesControlPlane+: {
+      //[name]: super[name]
+      [name]: super[name] + (if super[name].kind == 'ServiceMonitor' || super[name].kind == 'PodMonitor' then setInstanceForObject('k8') else {})
+      for name in std.objectFields(super.kubernetesControlPlane)
+    },
+    /// JSONNET OVVERRIDES END HERE
   };
 
 // Hardcoded settings to extend PrometheusSpec
@@ -158,6 +185,7 @@ local customizePrometheusSpec(instance, port) =
   };
 
 // Main prometheus instance
+// TODO: Convert to main object https://github.com/prometheus-operator/kube-prometheus/blob/main/jsonnet/kube-prometheus/main.libsonnet#L89
 local kp_k8s =
   kp
   {
@@ -225,10 +253,9 @@ local kp_istio =
 { ['4/prometheus-istio-' + name]: kp_istio.prometheus[name] for name in std.objectFields(kp_istio.prometheus) } +
 { ['4/alertmanager-' + name]: kp.alertmanager[name] for name in std.objectFields(kp.alertmanager) } +
 // //{ ['blackbox-exporter-' + name]: kp.blackboxExporter[name] for name in std.objectFields(kp.blackboxExporter) } +
-{ ['5/grafana-' + name]: kp.grafana[name] for name in std.objectFields(kp.grafana) }
 // //{ ['kube-state-metrics-' + name]: kp.kubeStateMetrics[name] for name in std.objectFields(kp.kubeStateMetrics) } +
-// //{ ['kubernetes-' + name]: kp.kubernetesControlPlane[name] for name in std.objectFields(kp.kubernetesControlPlane) }
-// { ['3/prometheus-' + name]: kp.prometheus[name] for name in std.objectFields(kp.prometheus) }
+{ ['5/kubernetes-' + name]: kp.kubernetesControlPlane[name] for name in std.objectFields(kp.kubernetesControlPlane) } +
+{ ['6/grafana-' + name]: kp.grafana[name] for name in std.objectFields(kp.grafana) }
 // //{ ['prometheus-adapter-' + name]: kp.prometheusAdapter[name] for name in std.objectFields(kp.prometheusAdapter) }
 
 
