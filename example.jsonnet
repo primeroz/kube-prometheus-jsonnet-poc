@@ -90,7 +90,7 @@ local kp =
       },
       prometheus+: {
         resources: {
-          requests: { cpu: '250m', memory: '400Mi' },
+          requests: { cpu: '150m', memory: '400Mi' },
           limits: { cpu: '2500m', memory: '4000Mi' },
         },
         enableFeatures: [],  // XXX ?
