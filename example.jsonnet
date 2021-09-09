@@ -8,14 +8,14 @@ local k = import 'vendor/k8s-jsonnet-libs/gen/github.com/jsonnet-libs/k8s-libson
 local kplib = import 'vendor/k8s-jsonnet-libs/gen/github.com/jsonnet-libs/kube-prometheus-libsonnet/0.8/main.libsonnet';
 
 // get with `minikube ip` command
-local minikube_ip = '192.168.39.44';
+local minikube_ip = '192.168.39.7';
 
 // prometheus jsonnet lib
 local prom = kplib.monitoring.v1.prometheus;
 local sm = kplib.monitoring.v1.serviceMonitor;
 
 
-local setInstanceForServiceMonitor(instance) =
+local setInstanceForObject(instance) =
   {
     metadata+: {
       labels+: {
@@ -97,7 +97,7 @@ local kp =
     },
     prometheusOperator+: {
       serviceMonitor+:
-        setInstanceForServiceMonitor('k8s'),
+        setInstanceForObject('k8s'),
     },
     prometheus+: {
       // backward compatible for older k8s
@@ -111,6 +111,10 @@ local kp =
         ],
       },
     },
+    grafana+: {
+      serviceMonitor+:
+        setInstanceForObject('k8s'),
+    },
     alertmanager+: {
       alertmanager+: {
         // Reference info: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#alertmanagerspec
@@ -119,10 +123,12 @@ local kp =
           logLevel: 'debug',  // So firing alerts show up in log
         },
       },
+      serviceMonitor+:
+        setInstanceForObject('k8s'),
     },
     nodeExporter+: {
       serviceMonitor+:
-        setInstanceForServiceMonitor('k8s') +
+        setInstanceForObject('k8s') +
         {
           spec+: {
             // Override Interval for nodeExporter ( PR Upstream ? )
@@ -167,7 +173,7 @@ local kp_k8s =
     prometheus+: customizePrometheusSpec($.values.prometheus.name, '30900') +
                  {
                    serviceMonitor+:
-                     setInstanceForServiceMonitor('k8s'),
+                     setInstanceForObject('k8s'),
                  },
   };
 
@@ -195,7 +201,7 @@ local kp_istio =
                  } +
                  {
                    serviceMonitor+:
-                     setInstanceForServiceMonitor('istio'),
+                     setInstanceForObject('istio'),
                  },
   };
 
@@ -210,7 +216,8 @@ local kp_istio =
 // serviceMonitor and prometheusRule are separated so that they can be created after the CRDs are ready
 { '2/prometheus-operator-serviceMonitor': kp.prometheusOperator.serviceMonitor } +
 { '2/prometheus-operator-prometheusRule': kp.prometheusOperator.prometheusRule } +
-//{ '2/kube-prometheus-prometheusRule': kp.kubePrometheus.prometheusRule } + // need on both istio and k8s instances
+{ '2/kube-prometheus-prometheusRule-k8s': kp.kubePrometheus.prometheusRule + setInstanceForObject('k8s') + { metadata+: { name: 'kube-prometheus-rules-k8s' } } } +
+{ '2/kube-prometheus-prometheusRule-istio': kp.kubePrometheus.prometheusRule + setInstanceForObject('istio') + { metadata+: { name: 'kube-prometheus-rules-istio' } } } +
 // Monitoring workloads
 { ['3/node-exporter-' + name]: kp.nodeExporter[name] for name in std.objectFields(kp.nodeExporter) }
 // Prometheus instances
