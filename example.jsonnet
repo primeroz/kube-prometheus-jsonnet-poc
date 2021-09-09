@@ -134,6 +134,10 @@ local kp =
         ],
       },
     },
+    kubeStateMetrics+: {
+      serviceMonitor+:
+        setInstanceForObject('k8s'),
+    },
     grafana+: {
       serviceMonitor+:
         setInstanceForObject('k8s'),
@@ -255,9 +259,9 @@ local kp_istio =
 { ['4/prometheus-istio-' + name]: kp_istio.prometheus[name] for name in std.objectFields(kp_istio.prometheus) } +
 { ['4/alertmanager-' + name]: kp.alertmanager[name] for name in std.objectFields(kp.alertmanager) } +
 // //{ ['blackbox-exporter-' + name]: kp.blackboxExporter[name] for name in std.objectFields(kp.blackboxExporter) } +
-// //{ ['kube-state-metrics-' + name]: kp.kubeStateMetrics[name] for name in std.objectFields(kp.kubeStateMetrics) } +
-{ ['5/kubernetes-' + name]: kp.kubernetesControlPlane[name] for name in std.objectFields(kp.kubernetesControlPlane) } +
-{ ['6/grafana-' + name]: kp.grafana[name] for name in std.objectFields(kp.grafana) }
+{ ['5/kube-state-metrics-' + name]: kp.kubeStateMetrics[name] for name in std.objectFields(kp.kubeStateMetrics) } +
+{ ['6/kubernetes-' + name]: kp.kubernetesControlPlane[name] for name in std.objectFields(kp.kubernetesControlPlane) } +
+{ ['7/grafana-' + name]: kp.grafana[name] for name in std.objectFields(kp.grafana) }
 // //{ ['prometheus-adapter-' + name]: kp.prometheusAdapter[name] for name in std.objectFields(kp.prometheusAdapter) }
 
 
