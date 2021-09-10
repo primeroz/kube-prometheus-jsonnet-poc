@@ -15,6 +15,7 @@ local minikube_ip = std.extVar('minikube_ip');
 
 // prometheus jsonnet lib
 local prom = kplib.monitoring.v1.prometheus;
+local am = kplib.monitoring.v1.alertmanager;
 local sm = kplib.monitoring.v1.serviceMonitor;
 
 
@@ -144,13 +145,9 @@ local kp =
         setInstanceForObject('k8s'),
     },
     alertmanager+: {
-      alertmanager+: {
-        // Reference info: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#alertmanagerspec
-        spec+: {
-          externalUrl: std.format('http://%s:%s', [minikube_ip, '30903']),
-          logLevel: 'debug',  // So firing alerts show up in log
-        },
-      },
+      alertmanager+:
+        am.spec.withExternalUrl(std.format('http://%s:%s', [minikube_ip, '30903'])) +
+        am.spec.withLogLevel('debug'),
       serviceMonitor+:
         setInstanceForObject('k8s'),
     },
