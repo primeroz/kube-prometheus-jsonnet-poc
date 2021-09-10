@@ -10,7 +10,8 @@ local k = import 'vendor/k8s-jsonnet-libs/gen/github.com/jsonnet-libs/k8s-libson
 local kplib = import 'vendor/k8s-jsonnet-libs/gen/github.com/jsonnet-libs/kube-prometheus-libsonnet/0.8/main.libsonnet';
 
 // get with `minikube ip` command
-local minikube_ip = '192.168.39.7';
+//local minikube_ip = '192.168.39.7';
+local minikube_ip = std.extVar('minikube_ip');
 
 // prometheus jsonnet lib
 local prom = kplib.monitoring.v1.prometheus;
