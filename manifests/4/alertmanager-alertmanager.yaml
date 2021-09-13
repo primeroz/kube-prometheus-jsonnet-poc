@@ -23,7 +23,10 @@ spec:
           - monitoring
           topologyKey: kubernetes.io/hostname
         weight: 100
-  externalUrl: http://192.168.39.173:30903
+  alertmanagerConfigSelector:
+    matchLabels:
+      alertmanager: main
+  externalUrl: http://192.168.39.151:30903
   image: quay.io/prometheus/alertmanager:v0.23.0
   logLevel: debug
   nodeSelector:

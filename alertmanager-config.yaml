@@ -1,0 +1,59 @@
+global:
+  resolve_timeout: 5m
+
+templates:
+- '/etc/alertmanager/secrets/*.tmpl'
+
+route:
+  group_by:
+    - namespace
+    - alertname
+    - cluster
+  group_interval: 5m
+  group_wait: 30s
+  receiver: Default
+  repeat_interval: 1h
+  routes:
+    - match:
+        alertname: Watchdog
+      receiver: Watchdog
+
+inhibit_rules:
+  - equal:
+      - namespace
+      - alertname
+      - cluster
+    source_match:
+      severity: critical
+    target_match_re:
+      severity: warning|info
+  - equal:
+      - namespace
+      - alertname
+      - cluster
+    source_match:
+      severity: warning
+    target_match_re:
+      severity: info
+
+receivers:
+  - name: Default
+    pagerduty_configs:
+    - send_resolved: true
+      routing_key: '{{ template "pagerduty.sre.integrationKey" }}'
+      url: https://events.pagerduty.com/v2/enqueue
+      client: '{{ template "pagerduty.default.client" . }}'
+      client_url: '{{ template "pagerduty.default.clientURL" . }}'
+      description: '{{ template "pagerduty.default.description" .}}'
+      details:
+        firing: '{{ template "pagerduty.default.instances" .Alerts.Firing }}'
+        num_firing: '{{ .Alerts.Firing | len }}'
+        num_resolved: '{{ .Alerts.Resolved | len }}'
+        resolved: '{{ template "pagerduty.default.instances" .Alerts.Resolved }}'
+      severity: '{{ if eq .GroupLabels.severity "critical" }}critical{{ else if eq .GroupLabels.severity "warning" }}warning{{ else }}info{{ end }}'
+      class: SampleClassFromAlertmanager
+      component: '{{ if .GroupLabels.component }}{{.GroupLabels.component}}{{ else }}None{{
+        end }}'
+      group: '{{ if .GroupLabels.k8s_cluster }}{{.GroupLabels.k8s_cluster}}{{ else }}None{{
+        end }}'
+  - name: Watchdog

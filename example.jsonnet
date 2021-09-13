@@ -16,6 +16,7 @@ local minikube_ip = std.extVar('minikube_ip');
 // prometheus jsonnet lib
 local prom = kplib.monitoring.v1.prometheus;
 local am = kplib.monitoring.v1.alertmanager;
+local amcfg = kplib.monitoring.v1alpha1.alertmanagerConfig;
 local sm = kplib.monitoring.v1.serviceMonitor;
 
 
@@ -60,9 +61,9 @@ local kp =
           prometheus: '2.29.2',
         },
       },
-      //alertmanager+: {
-      //config: importstr 'alertmanager-config.yaml',
-      //},
+      alertmanager+: {
+        config: importstr 'alertmanager-config.yaml',
+      },
       grafana+: {
         config: {  // http://docs.grafana.org/installation/configuration/
           sections: {
@@ -145,9 +146,53 @@ local kp =
         setInstanceForObject('k8s'),
     },
     alertmanager+: {
+      local this = self,
       alertmanager+:
         am.spec.withExternalUrl(std.format('http://%s:%s', [minikube_ip, '30903'])) +
-        am.spec.withLogLevel('debug'),
+        am.spec.withLogLevel('debug') +
+        am.spec.alertmanagerConfigSelector.withMatchLabels({ alertmanager: 'main' }),
+      // logformat
+      // alertmanager custom secret for main configuration
+      // priorityclass
+      // configmaps // Templates ?
+      alertManagerPagerdutySreConf+:: {
+        name: 'pagerduty-sre',
+        pagerdutyConfigs: [{
+          sendResolved: true,
+          routingKey: {  // Since we use the events v2
+            name: 'pagerduty-sre-secret',
+            key: 'apiKey',
+          },
+          client: '{{ template "pagerduty.default.client" . }}',
+          clientURL: '{{ template "pagerduty.default.clientURL" . }}',
+          description: '{{ template "pagerduty.default.description" .}}',  // TODO '[#{{ .CommonLabels.k8s_environment | toUpper }}/{{ if .GroupLabels.k8s_cluster                  }}{{.GroupLabels.k8s_cluster | toUpper }}{{ else }}NoCluster{{ end }}][{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}]{{ .GroupLabels.SortedPairs.Values | join " " }}' // DEDUP on pagerduty ?
+          severity: '{{ if eq .GroupLabels.severity "critical" }}critical{{ else if eq .GroupLabels.severity "warning" }}warning{{ else }}info{{ end }}',
+          class: 'SampleClassFromAlertmanager',
+          group: '{{ if .GroupLabels.k8s_cluster }}{{.GroupLabels.k8s_cluster}}{{ else }}None{{ end }}',  // TODO
+          component: '{{ if .GroupLabels.component }}{{.GroupLabels.component}}{{ else }}None{{ end }}',  // TODO
+          details: [],
+          //details: [{
+          //cluster: '{{ if .GroupLabels.cluster }}{{.GroupLabels.k8s_cluster}}{{ else }}None{{ end }}',  // TODO
+          //environment: '{{ if .CommonLabels.environment }}{{.CommonLabels.k8s_environment}}{{ else }}None{{ end }}',
+          //owner: '{{if .CommonLabels.label_influxdata_io_owner}}{{.CommonLabels.label_influxdata_io_owner}}{{else if .CommonLabels.influxdata_io_owner}}{{.CommonLabels.influxdata_io_owner}}{{else}}None{{end}}',
+          //page: '{{ $do_page := "" }}{{ range .Alerts.Firing }}{{ range .Labels.SortedPairs }}{{ if (and (eq .Name "page") (eq .Value "false"))}}{{ $do_page = "false"}}{{ end }}{{ end }}{{ end }}{{ $do_page }}',
+          //}],
+          //links: '', can we attach a link to this object ?
+        }],
+      },
+      alertManagerPagerdutyReceiverConf+::
+        amcfg.new('alertmanager-pagerduty-sre') +
+        amcfg.metadata.withNamespace(this.alertmanager.metadata.namespace) +
+        amcfg.metadata.withLabelsMixin(this.alertmanager.metadata.labels) +
+        //amcfg.metadata.withAnnotationsMixin(this.alertmanager.metadata.annotations),
+        amcfg.spec.route.withContinue(false) +
+        amcfg.spec.route.withGroupBy(['cluster', 'prometheus', 'namespace', 'alertname']) +
+        amcfg.spec.route.withGroupWait('30s') +
+        amcfg.spec.route.withGroupInterval('5m') +
+        amcfg.spec.route.withRepeatInterval('1h') +
+        amcfg.spec.route.withMatchers([{ name: 'prometheus', value: 'monitoring/k8s', regex: false }]) +
+        amcfg.spec.route.withReceiver(this.alertManagerPagerdutySreConf.name) +
+        amcfg.spec.withReceiversMixin(this.alertManagerPagerdutySreConf),
       serviceMonitor+:
         setInstanceForObject('k8s'),
     },
