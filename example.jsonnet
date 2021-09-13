@@ -150,11 +150,19 @@ local kp =
       alertmanager+:
         am.spec.withExternalUrl(std.format('http://%s:%s', [minikube_ip, '30903'])) +
         am.spec.withLogLevel('debug') +
-        am.spec.alertmanagerConfigSelector.withMatchLabels({ alertmanager: 'main' }),
+        am.spec.alertmanagerConfigSelector.withMatchLabels({ alertmanager: 'main' }) +
+        am.spec.withSecretsMixin(['alertmanager-tmpl-secrets']) +
+        am.spec.withConfigMapsMixin(this.alertmanagerTemplatesConfigmap.metadata.name),
       // logformat
       // alertmanager custom secret for main configuration
       // priorityclass
       // configmaps // Templates ?
+      alertmanagerTemplatesConfigmap+:
+        local cm = k.core.v1.configMap;
+
+        cm.new('influx-alertmanager-templates', { templates: importstr './alertmanager.templates' }) +
+        cm.metadata.withNamespace(this.alertmanager.metadata.namespace) +
+        cm.metadata.withLabelsMixin(this.alertmanager.metadata.labels),
       alertManagerPagerdutySreConf+:: {
         name: 'pagerduty-sre',
         pagerdutyConfigs: [{
@@ -166,10 +174,10 @@ local kp =
           client: '{{ template "pagerduty.default.client" . }}',
           clientURL: '{{ template "pagerduty.default.clientURL" . }}',
           description: '{{ template "pagerduty.default.description" .}}',  // TODO '[#{{ .CommonLabels.k8s_environment | toUpper }}/{{ if .GroupLabels.k8s_cluster                  }}{{.GroupLabels.k8s_cluster | toUpper }}{{ else }}NoCluster{{ end }}][{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}]{{ .GroupLabels.SortedPairs.Values | join " " }}' // DEDUP on pagerduty ?
-          severity: '{{ if eq .GroupLabels.severity "critical" }}critical{{ else if eq .GroupLabels.severity "warning" }}warning{{ else }}info{{ end }}',
-          class: 'SampleClassFromAlertmanager',
-          group: '{{ if .GroupLabels.k8s_cluster }}{{.GroupLabels.k8s_cluster}}{{ else }}None{{ end }}',  // TODO
-          component: '{{ if .GroupLabels.component }}{{.GroupLabels.component}}{{ else }}None{{ end }}',  // TODO
+          //severity: '{{ if eq .GroupLabels.severity "critical" }}critical{{ else if eq .GroupLabels.severity "warning" }}warning{{ else }}info{{ end }}',
+          //class: 'SampleClassFromAlertmanager',
+          //group: '{{ if .GroupLabels.k8s_cluster }}{{.GroupLabels.k8s_cluster}}{{ else }}None{{ end }}',  // TODO
+          //component: '{{ if .GroupLabels.component }}{{.GroupLabels.component}}{{ else }}None{{ end }}',  // TODO
           details: [],
           //details: [{
           //cluster: '{{ if .GroupLabels.cluster }}{{.GroupLabels.k8s_cluster}}{{ else }}None{{ end }}',  // TODO

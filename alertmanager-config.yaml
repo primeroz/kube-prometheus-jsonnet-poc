@@ -2,13 +2,15 @@ global:
   resolve_timeout: 5m
 
 templates:
-- '/etc/alertmanager/secrets/*.tmpl'
+- '/etc/alertmanager/secrets/*-tmpl-secrets/secrets'
+- '/etc/alertmanager/configmaps/*-templates/templates'
 
 route:
   group_by:
     - namespace
     - alertname
     - cluster
+    - severity
   group_interval: 5m
   group_wait: 30s
   receiver: Default
@@ -42,15 +44,15 @@ receivers:
     - send_resolved: true
       routing_key: '{{ template "pagerduty.sre.integrationKey" }}'
       url: https://events.pagerduty.com/v2/enqueue
-      client: '{{ template "pagerduty.default.client" . }}'
-      client_url: '{{ template "pagerduty.default.clientURL" . }}'
-      description: '{{ template "pagerduty.default.description" .}}'
+      client: '{{ template "myorg.pagerduty.client" . }}'
+      client_url: '{{ template "myorg.pagerduty.clientURL" . }}'
+      description: '{{ template "myorg.pagerduty.description" .}}'
       details:
-        firing: '{{ template "pagerduty.default.instances" .Alerts.Firing }}'
+        firing: '{{ template "myorg.pagerduty.instances" .Alerts.Firing }}'
         num_firing: '{{ .Alerts.Firing | len }}'
         num_resolved: '{{ .Alerts.Resolved | len }}'
         resolved: '{{ template "pagerduty.default.instances" .Alerts.Resolved }}'
-      severity: '{{ if eq .GroupLabels.severity "critical" }}critical{{ else if eq .GroupLabels.severity "warning" }}warning{{ else }}info{{ end }}'
+      severity: '{{ template "myorg.pagerduty.severity" . }}'
       class: SampleClassFromAlertmanager
       component: '{{ if .GroupLabels.component }}{{.GroupLabels.component}}{{ else }}None{{
         end }}'

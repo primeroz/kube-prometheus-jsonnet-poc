@@ -26,6 +26,8 @@ spec:
   alertmanagerConfigSelector:
     matchLabels:
       alertmanager: main
+  configMaps:
+  - influx-alertmanager-templates
   externalUrl: http://192.168.39.151:30903
   image: quay.io/prometheus/alertmanager:v0.23.0
   logLevel: debug
@@ -45,6 +47,8 @@ spec:
     requests:
       cpu: 4m
       memory: 100Mi
+  secrets:
+  - alertmanager-tmpl-secrets
   securityContext:
     fsGroup: 2000
     runAsNonRoot: true
