@@ -34,7 +34,7 @@ spec:
   externalLabels:
     cluster: someCluster
     instance: istio
-  externalUrl: http://192.168.39.86:30901
+  externalUrl: http://192.168.39.173:30901
   image: quay.io/prometheus/prometheus:v2.29.2
   nodeSelector:
     kubernetes.io/os: linux
