@@ -1,13 +1,15 @@
 // TODO: rule label for recording rules as well as recording rules ?  see ruleSelector
 // TODO: Dashboards - take a long time to render ...
-// TODO: Dashboards - split up in multiple ConfigMaps object or hit the limit of 1MB ( is alreayd split )
 // TODO: Dashboard - filter out dashboards we don't need / want
 // TODO: Prometheus - service monitor - exclude some namespaces for safety
-// TODO: Prometheus - Ingestigate SLO rules
+// TODO: Prometheus - Ingestigate SLO rules with sloth
+// TODO: Prometheus - Update /Add / Remove rules -
 
 
 local k = import 'vendor/k8s-jsonnet-libs/gen/github.com/jsonnet-libs/k8s-libsonnet/1.19/main.libsonnet';
 local kplib = import 'vendor/k8s-jsonnet-libs/gen/github.com/jsonnet-libs/kube-prometheus-libsonnet/0.8/main.libsonnet';
+
+local addMixin = import 'kube-prometheus/lib/mixin.libsonnet';
 
 // get with `minikube ip` command
 //local minikube_ip = '192.168.39.7';
@@ -38,6 +40,16 @@ local setEndpointsIntevalForServiceMonitor(endpoints, interval) =
     , endpoints
   );
 
+// Extra Mixins
+local certManagerMixin = addMixin({
+  name: 'certmanager',
+  mixin: (import 'vendor/cert-manager-mixin/mixin.libsonnet') + {
+    _config+: {
+      certManagerCertExpiryDays: '15',
+    },  // mixin configuration object
+  },
+});
+
 // Kube Prometheus definition
 local kp =
   (import 'kube-prometheus/main.libsonnet') +
@@ -65,6 +77,7 @@ local kp =
         config: importstr 'alertmanager-config.yaml',
       },
       grafana+: {
+        dashboards+: certManagerMixin.grafanaDashboards,
         config: {  // http://docs.grafana.org/installation/configuration/
           sections: {
             // Do not require grafana users to login/authenticate
@@ -312,7 +325,8 @@ local kp_istio =
 // //{ ['blackbox-exporter-' + name]: kp.blackboxExporter[name] for name in std.objectFields(kp.blackboxExporter) } +
 { ['5/kube-state-metrics-' + name]: kp.kubeStateMetrics[name] for name in std.objectFields(kp.kubeStateMetrics) } +
 { ['6/kubernetes-' + name]: kp.kubernetesControlPlane[name] for name in std.objectFields(kp.kubernetesControlPlane) } +
-{ ['7/grafana-' + name]: kp.grafana[name] for name in std.objectFields(kp.grafana) }
+{ ['7/grafana-' + name]: kp.grafana[name] for name in std.objectFields(kp.grafana) } +
+{ '10/certmanager.rules': certManagerMixin.prometheusRules }
 // //{ ['prometheus-adapter-' + name]: kp.prometheusAdapter[name] for name in std.objectFields(kp.prometheusAdapter) }
 
 

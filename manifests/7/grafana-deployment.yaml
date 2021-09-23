@@ -60,6 +60,9 @@ spec:
         - mountPath: /grafana-dashboard-definitions/0/apiserver
           name: grafana-dashboard-apiserver
           readOnly: false
+        - mountPath: /grafana-dashboard-definitions/0/cert-manager
+          name: grafana-dashboard-cert-manager
+          readOnly: false
         - mountPath: /grafana-dashboard-definitions/0/cluster-total
           name: grafana-dashboard-cluster-total
           readOnly: false
@@ -148,6 +151,9 @@ spec:
       - configMap:
           name: grafana-dashboard-apiserver
         name: grafana-dashboard-apiserver
+      - configMap:
+          name: grafana-dashboard-cert-manager
+        name: grafana-dashboard-cert-manager
       - configMap:
           name: grafana-dashboard-cluster-total
         name: grafana-dashboard-cluster-total
