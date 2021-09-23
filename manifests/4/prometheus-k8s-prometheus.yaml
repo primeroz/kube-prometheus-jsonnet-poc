@@ -34,7 +34,7 @@ spec:
   externalLabels:
     cluster: someCluster
     instance: k8s
-  externalUrl: http://192.168.39.151:30900
+  externalUrl: http://192.168.39.231:30900
   image: quay.io/prometheus/prometheus:v2.29.2
   nodeSelector:
     kubernetes.io/os: linux
