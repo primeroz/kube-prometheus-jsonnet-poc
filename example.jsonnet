@@ -42,7 +42,7 @@ local setEndpointsIntevalForServiceMonitor(endpoints, interval) =
 local kp =
   (import 'kube-prometheus/main.libsonnet') +
   (import 'kube-prometheus/addons/anti-affinity.libsonnet') +
-  //(import 'kube-prometheus/addons/managed-cluster.libsonnet') + // this is not a managed cluster
+  (import 'kube-prometheus/addons/managed-cluster.libsonnet') +  // Do not monitor controlplane
   (import 'kube-prometheus/addons/all-namespaces.libsonnet') +
   // Note that NodePort type services is likely not a good idea for your production use case, it is only used for demonstration purposes here.
   (import 'kube-prometheus/addons/node-ports.libsonnet') +
