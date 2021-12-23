@@ -5,7 +5,7 @@ metadata:
     app.kubernetes.io/component: prometheus
     app.kubernetes.io/name: prometheus
     app.kubernetes.io/part-of: kube-prometheus
-    app.kubernetes.io/version: 2.29.2
+    app.kubernetes.io/version: 2.31.1
     prometheus: istio
   name: istio
   namespace: monitoring
@@ -34,8 +34,8 @@ spec:
   externalLabels:
     cluster: someCluster
     instance: istio
-  externalUrl: http://192.168.39.231:30901
-  image: quay.io/prometheus/prometheus:v2.29.2
+  externalUrl: http://192.168.39.69:30901
+  image: quay.io/prometheus/prometheus:v2.31.1
   nodeSelector:
     kubernetes.io/os: linux
   podMetadata:
@@ -43,7 +43,7 @@ spec:
       app.kubernetes.io/component: prometheus
       app.kubernetes.io/name: prometheus
       app.kubernetes.io/part-of: kube-prometheus
-      app.kubernetes.io/version: 2.29.2
+      app.kubernetes.io/version: 2.31.1
   podMonitorNamespaceSelector: {}
   podMonitorSelector:
     matchLabels:
@@ -83,4 +83,4 @@ spec:
   serviceMonitorSelector:
     matchLabels:
       prometheus: istio
-  version: 2.29.2
+  version: 2.31.1

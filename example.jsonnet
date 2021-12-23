@@ -67,10 +67,10 @@ local kp =
         platform: 'kubeadm',
         versions+: {
           alertmanager: '0.23.0',
-          grafana: '8.1.2',
+          grafana: '8.3.2',
           nodeExporter: '1.2.2',
-          //prometheusOperator: '0.50.0',
-          prometheus: '2.29.2',
+          prometheusOperator: '0.51.2',
+          prometheus: '2.31.1',
         },
       },
       alertmanager+: {
