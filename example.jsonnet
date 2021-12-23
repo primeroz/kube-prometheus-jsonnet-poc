@@ -66,11 +66,12 @@ local kp =
         namespace: 'monitoring',
         platform: 'kubeadm',
         versions+: {
-          alertmanager: '0.23.0',
-          grafana: '8.3.2',
-          nodeExporter: '1.2.2',
-          prometheusOperator: '0.51.2',
-          prometheus: '2.31.1',
+          //alertmanager: '0.23.0',
+          //grafana: '8.3.2',
+          //nodeExporter: '1.2.2',
+          //prometheusOperator: '0.53.1',
+          //prometheusOperator: '0.51.2',
+          //prometheus: '2.31.1',
         },
       },
       alertmanager+: {
@@ -161,6 +162,7 @@ local kp =
     alertmanager+: {
       local this = self,
       alertmanager+:
+        am.metadata.withLabelsMixin({ alertmanager: 'main' }) +
         am.spec.withExternalUrl(std.format('http://%s:%s', [minikube_ip, '30903'])) +
         am.spec.withLogLevel('debug') +
         am.spec.alertmanagerConfigSelector.withMatchLabels({ alertmanager: 'main' }) +
@@ -246,6 +248,7 @@ local customizePrometheusSpec(instance, port) =
     //    values: [instance],
     //  },
     prometheus+:
+      prom.metadata.withLabelsMixin({ prometheus: instance }) +
       prom.spec.withRetention('24h') +
       prom.spec.withRetentionSize('500MB') +
       prom.spec.withExternalUrl(std.format('http://%s:%s', [minikube_ip, port])) +

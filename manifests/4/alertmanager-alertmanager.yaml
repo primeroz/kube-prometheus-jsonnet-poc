@@ -4,6 +4,7 @@ metadata:
   labels:
     alertmanager: main
     app.kubernetes.io/component: alert-router
+    app.kubernetes.io/instance: main
     app.kubernetes.io/name: alertmanager
     app.kubernetes.io/part-of: kube-prometheus
     app.kubernetes.io/version: 0.23.0
@@ -17,6 +18,7 @@ spec:
           labelSelector:
             matchLabels:
               app.kubernetes.io/component: alert-router
+              app.kubernetes.io/instance: main
               app.kubernetes.io/name: alertmanager
               app.kubernetes.io/part-of: kube-prometheus
           namespaces:
@@ -28,14 +30,16 @@ spec:
       alertmanager: main
   configMaps:
   - influx-alertmanager-templates
-  externalUrl: http://192.168.39.69:30903
+  externalUrl: http://192.168.39.213:30903
   image: quay.io/prometheus/alertmanager:v0.23.0
   logLevel: debug
   nodeSelector:
     kubernetes.io/os: linux
   podMetadata:
     labels:
+      alertmanager: main
       app.kubernetes.io/component: alert-router
+      app.kubernetes.io/instance: main
       app.kubernetes.io/name: alertmanager
       app.kubernetes.io/part-of: kube-prometheus
       app.kubernetes.io/version: 0.23.0
