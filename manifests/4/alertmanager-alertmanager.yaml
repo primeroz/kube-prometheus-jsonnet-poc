@@ -30,7 +30,7 @@ spec:
       alertmanager: main
   configMaps:
   - influx-alertmanager-templates
-  externalUrl: http://192.168.39.213:30903
+  externalUrl: http://192.168.39.180:30903
   image: quay.io/prometheus/alertmanager:v0.23.0
   logLevel: debug
   nodeSelector:

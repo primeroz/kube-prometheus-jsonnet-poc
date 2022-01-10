@@ -136,9 +136,13 @@ local kp =
 
     /// JSONNET OVVERRIDES START HERE
     prometheusOperator+: {
-      serviceMonitor+:
-        setInstanceForObject('k8s'),
-    },
+                           serviceMonitor+:
+                             setInstanceForObject('k8s'),
+                         } +
+                         {
+                           [name]: super[name] + (if super[name].kind == 'CustomResourceDefinition' then { metadata+: { annotations+: { 'argocd.argoproj.io/sync-options': 'Replace=true' } } } else {})
+                           for name in std.objectFields(super.prometheusOperator)
+                         },
     prometheus+: {
       // backward compatible for older k8s
       clusterRole+: {
@@ -150,6 +154,12 @@ local kp =
           },
         ],
       },
+
+      //policy/v1 is not available at least until version 1.20 and won't be removed until 1.25
+      podDisruptionBudget+: {
+        apiVersion: 'policy/v1beta1',
+      },
+
     },
     kubeStateMetrics+: {
       serviceMonitor+:
@@ -218,6 +228,11 @@ local kp =
         amcfg.spec.withReceiversMixin(this.alertManagerPagerdutySreConf),
       serviceMonitor+:
         setInstanceForObject('k8s'),
+
+      //policy/v1 is not available at least until version 1.20 and won't be removed until 1.25
+      podDisruptionBudget+: {
+        apiVersion: 'policy/v1beta1',
+      },
     },
     nodeExporter+: {
       serviceMonitor+:
