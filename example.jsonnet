@@ -155,10 +155,6 @@ local kp =
         ],
       },
 
-      //policy/v1 is not available at least until version 1.20 and won't be removed until 1.25
-      podDisruptionBudget+: {
-        apiVersion: 'policy/v1beta1',
-      },
 
     },
     kubeStateMetrics+: {
@@ -318,6 +314,7 @@ local kp_istio =
                  {
                    serviceMonitor+:
                      setInstanceForObject('istio'),
+
                  },
   };
 
